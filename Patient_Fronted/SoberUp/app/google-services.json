@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "339956875597",
+    "project_id": "soberup-a9be3",
+    "storage_bucket": "soberup-a9be3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:339956875597:android:082b3e7d5c1a09d0257704",
+        "android_client_info": {
+          "package_name": "com.example.soberup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCL-eXTSDnt2yCyF8h1ctPCtMAI-NXIOrE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

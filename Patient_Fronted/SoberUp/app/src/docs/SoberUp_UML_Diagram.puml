@@ -1,0 +1,263 @@
+@startuml SoberUp App - UML Klassendiagramm
+
+!define COMPOSITION arrow
+!define AGGREGATION arrow
+!define DEPENDENCY arrow
+
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FFFFFF
+skinparam class {
+    BackgroundColor #E8F4F8
+    BorderColor #2E7D8F
+    ArrowColor #2E7D8F
+}
+
+package "com.example.soberup" {
+    
+    ' ============================================
+    ' ACTIVITY & NAVIGATION
+    ' ============================================
+    
+    class MainActivity {
+        - sessionManager: SessionManager
+        + onCreate(savedInstanceState: Bundle?)
+    }
+    
+    class NavGraph {
+        + NavGraph(navController, startDestination, onLoginSuccess, sessionManager)
+        + currentUserId: String?
+    }
+    
+    sealed class Screen {
+        + route: String
+        + Login
+        + PatientDashboard
+        + PatientProfile
+        + PatientSettings
+        + SupportLocations
+        + TriggerManagement
+    }
+    
+    ' ============================================
+    ' DATA MODELS
+    ' ============================================
+    
+    class User {
+        + id: String
+        + username: String
+        + password: String
+        + role: String
+        + name: String
+        + email: String
+        + soberDays: Int
+        + soberSince: Timestamp?
+        + sosContact: SOSContact?
+        + triggers: List<String>
+        + assignedDoctorId: String
+        + createdAt: Timestamp?
+        + lastMoodCheck: Timestamp?
+        + calculateSoberDays(): Int
+        + isPatient(): Boolean
+        + isDoctor(): Boolean
+        + isAdmin(): Boolean
+    }
+    
+    class MoodEntry {
+        + id: String
+        + date: Timestamp?
+        + moodValue: Int
+        + note: String
+        + createdAt: Timestamp?
+        + getMoodColor(): MoodColor
+    }
+    
+    enum MoodColor {
+        RED
+        YELLOW
+        GREEN
+    }
+    
+    class SOSContact {
+        + name: String
+        + phone: String
+    }
+    
+    class SupportLocation {
+        + id: String
+        + name: String
+        + address: String
+        + openingHours: String
+        + emergencyNumber: String
+        + createdBy: String
+        + createdAt: Timestamp?
+    }
+    
+    ' ============================================
+    ' REPOSITORIES
+    ' ============================================
+    
+    class UserRepository {
+        - firestore: FirebaseFirestore
+        + updateUser(user: User): Boolean
+        + updateSOSContact(userId: String, sosContact: SOSContact): Boolean
+        + updateTriggers(userId: String, triggers: List<String>): Boolean
+        + updateSoberDays(userId: String, soberDays: Int): Boolean
+        + updateSoberSince(userId: String, soberSince: Timestamp): Boolean
+        + getUser(userId: String): User?
+        - calculateSoberDays(soberSince: Timestamp): Int
+    }
+    
+    class AuthRepository {
+        - firestore: FirebaseFirestore
+        + loginByName(name: String, password: String): User?
+        + usernameExists(username: String): Boolean
+    }
+    
+    class MoodRepository {
+        - firestore: FirebaseFirestore
+        + getMoodEntries(userId: String, startDate: Date?, endDate: Date?): List<MoodEntry>
+        + getMoodEntriesForMonth(userId: String, year: Int, month: Int): List<MoodEntry>
+        + getMoodEntryForDate(userId: String, date: Date): MoodEntry?
+        + saveMoodEntry(userId: String, moodEntry: MoodEntry): Boolean
+    }
+    
+    class SupportLocationRepository {
+        - firestore: FirebaseFirestore
+        + getAllSupportLocations(): List<SupportLocation>
+    }
+    
+    class SessionManager {
+        - sharedPreferences: SharedPreferences
+        + saveSession(userId: String, username: String, role: String)
+        + clearSession()
+        + getUserId(): Flow<String?>
+        + getUsername(): Flow<String?>
+        + getRole(): Flow<String?>
+    }
+    
+    ' ============================================
+    ' VIEWMODELS
+    ' ============================================
+    
+    class PatientDashboardViewModel {
+        - userId: String
+        - moodRepository: MoodRepository
+        - userRepository: UserRepository
+        - _user: MutableStateFlow<User?>
+        - _moodEntries: MutableStateFlow<List<MoodEntry>>
+        - _todayMood: MutableStateFlow<MoodEntry?>
+        - _isLoading: MutableStateFlow<Boolean>
+        - _errorMessage: MutableStateFlow<String?>
+        + user: StateFlow<User?>
+        + moodEntries: StateFlow<List<MoodEntry>>
+        + todayMood: StateFlow<MoodEntry?>
+        + isLoading: StateFlow<Boolean>
+        + errorMessage: StateFlow<String?>
+        + loadUserData()
+        + loadMoodEntries()
+        + saveMood(moodValue: Int, note: String)
+        + getMoodForDate(date: Date): MoodEntry?
+        + updateSoberSince(soberSince: Timestamp)
+        + markAsDrunk()
+        + clearError()
+    }
+    
+    class PatientSettingsViewModel {
+        - userId: String
+        - userRepository: UserRepository
+        - _user: MutableStateFlow<User?>
+        - _isLoading: MutableStateFlow<Boolean>
+        - _errorMessage: MutableStateFlow<String?>
+        - _successMessage: MutableStateFlow<String?>
+        + user: StateFlow<User?>
+        + isLoading: StateFlow<Boolean>
+        + errorMessage: StateFlow<String?>
+        + successMessage: StateFlow<String?>
+        + updateSOSContact(sosContact: SOSContact)
+    }
+    
+    ' ============================================
+    ' UI SCREENS
+    ' ============================================
+    
+    class LoginScreen {
+        + onLoginSuccess: (User) -> Unit
+    }
+    
+    class PatientDashboardScreen {
+        + userId: String
+        + onNavigateToProfile: () -> Unit
+        + onNavigateToSettings: () -> Unit
+        + onNavigateToSupportLocations: () -> Unit
+        + onNavigateToTriggers: () -> Unit
+    }
+    
+    class PatientSettingsScreen {
+        + userId: String
+        + onNavigateBack: () -> Unit
+    }
+    
+    class TriggerManagementScreen {
+        + userId: String
+        + onNavigateBack: () -> Unit
+    }
+    
+    class SupportLocationsScreen {
+        + onNavigateBack: () -> Unit
+    }
+    
+    ' ============================================
+    ' BEZIEHUNGEN
+    ' ============================================
+    
+    MainActivity --> NavGraph : verwendet
+    NavGraph --> Screen : verwendet
+    NavGraph --> LoginScreen : navigiert zu
+    NavGraph --> PatientDashboardScreen : navigiert zu
+    NavGraph --> PatientSettingsScreen : navigiert zu
+    NavGraph --> TriggerManagementScreen : navigiert zu
+    NavGraph --> SupportLocationsScreen : navigiert zu
+    NavGraph --> SessionManager : verwendet
+    
+    PatientDashboardScreen --> PatientDashboardViewModel : verwendet
+    PatientSettingsScreen --> PatientSettingsViewModel : verwendet
+    
+    PatientDashboardViewModel --> UserRepository : verwendet
+    PatientDashboardViewModel --> MoodRepository : verwendet
+    PatientSettingsViewModel --> UserRepository : verwendet
+    
+    UserRepository --> User : erstellt/aktualisiert
+    AuthRepository --> User : erstellt
+    MoodRepository --> MoodEntry : erstellt/aktualisiert
+    SupportLocationRepository --> SupportLocation : erstellt
+    
+    User --> SOSContact : enthält
+    MoodEntry --> MoodColor : verwendet
+    
+    LoginScreen --> AuthRepository : verwendet
+    LoginScreen --> SessionManager : verwendet
+    
+    SupportLocationsScreen --> SupportLocationRepository : verwendet
+    
+    note right of User
+        **Hauptdatenmodell**
+        Enthält alle Benutzerinformationen
+        inkl. nüchterner Tage und SOS-Kontakt
+    end note
+    
+    note right of PatientDashboardViewModel
+        **Zentrale Logik**
+        Verwaltet User-Daten, Stimmungen
+        und nüchterne Tage
+    end note
+    
+    note right of UserRepository
+        **Datenzugriff**
+        CRUD-Operationen für User-Daten
+        in Firestore
+    end note
+
+}
+
+@enduml
+
