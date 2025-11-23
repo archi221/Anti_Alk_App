@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Diferent_pages" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Primary brand color using Android specific attributes -->
-        <item name="android:colorPrimary">@color/lavender</item>
-        <item name="android:colorPrimaryDark">@color/lavender_dark</item>
-        <item name="android:colorAccent">@color/teal_200</item>
-        <!-- Status bar color. -->
+    <style name="Theme.Diferent_pages" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/lavender</item>
+        <item name="colorPrimaryVariant">@color/lavender_dark</item>
+        <item name="colorAccent">@color/teal_200</item>
         <item name="android:statusBarColor">@color/lavender_dark</item>
     </style>
 
@@ -14,4 +12,5 @@
         <item name="android:windowEnterAnimation">@anim/slide_in</item>
         <item name="android:windowExitAnimation">@anim/slide_out</item>
     </style>
+
 </resources>
