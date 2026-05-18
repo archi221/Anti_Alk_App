@@ -1,5 +1,6 @@
 package com.example.soberup.data
 
+import android.annotation.SuppressLint
 import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
@@ -15,6 +16,7 @@ class SupportLocationRepository {
     /**
      * Get all support locations
      */
+    @SuppressLint("LongLogTag")
     suspend fun getAllSupportLocations(): List<SupportLocation> {
         return try {
             val snapshot = firestore.collection("supportLocations")
